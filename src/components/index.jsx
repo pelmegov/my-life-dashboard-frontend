@@ -15,3 +15,4 @@ export { default as Pie } from './Charts/Pie';
 export { default as ChartsHeader } from './ChartsHeader';
 export { default as Header } from './Header';
 export { default as LeetcodeDaily } from './LeetcodeDaily';
+export { default as Kanban } from './Kanban';

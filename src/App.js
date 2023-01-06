@@ -15,7 +15,7 @@ import {
     Editor,
     Employees,
     Financial,
-    Kanban,
+    KanbanList,
     Line,
     Orders,
     Pie,
@@ -79,7 +79,7 @@ const App = () => {
                                 <Route path="/customers" element={<Customers/>}></Route>
 
                                 { /* Apps */}
-                                <Route path="/kanban" element={<Kanban/>}></Route>
+                                <Route path="/kanban" element={<KanbanList/>}></Route>
                                 <Route path="/editor" element={<Editor/>}></Route>
                                 <Route path="/calendar" element={<Calendar/>}></Route>
                                 <Route path="/color-picker" element={<ColorPicker/>}></Route>

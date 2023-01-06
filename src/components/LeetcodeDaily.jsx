@@ -2,8 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {Button} from "./index";
 import {useStateContext} from "../contexts/ContextProvider";
 
+const CORS_PROXY = 'http://localhost:8888';
 const LEETCODE_LINK = 'https://leetcode.com';
-const LEETCODE_API_ENDPOINT = `https://cors-anywhere.herokuapp.com/${LEETCODE_LINK}/graphql`
+const LEETCODE_API_ENDPOINT = `${CORS_PROXY}/${LEETCODE_LINK}/graphql`
 const DAILY_CODING_CHALLENGE_QUERY = `
         query questionOfToday {
             activeDailyCodingChallengeQuestion {
@@ -38,29 +39,57 @@ function LeetcodeDaily(props) {
     const [difficulty, setDifficulty] = useState('Unknown');
     const [title, setTitle] = useState('Title');
 
-    useEffect(() => {
-        console.log(`Fetching daily coding challenge from LeetCode API.`);
+    useEffect(
+        () => {
+            fetch('/api/leetcode/' + new Date().toISOString().split('T')[0])
+                .then((res) => {
+                    console.log(`Fetching daily coding challenge from local database.`);
+                    return res.json();
+                })
+                .then(response => {
+                    setLink(LEETCODE_LINK + response.link);
+                    setDifficulty(response.difficulty);
+                    setTitle(response.title);
+                }).catch((err) => {
+                    console.log(`Leetcode challenge not found in database, fetching daily coding challenge from LeetCode API.`);
 
-        const init = {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({query: DAILY_CODING_CHALLENGE_QUERY}),
-        }
+                    const init = {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'origin': '', 'x-requested-with': ''},
+                        body: JSON.stringify({query: DAILY_CODING_CHALLENGE_QUERY}),
+                    }
 
-        fetch(LEETCODE_API_ENDPOINT, init)
-            .then((res) => {
-                return res.json();
-            })
-            .then(r => r.data.activeDailyCodingChallengeQuestion)
-            .then((data) => {
-                setLink(LEETCODE_LINK + data.link);
-                setDifficulty(data.question.difficulty);
-                setTitle(data.question.title);
-            })
-            .catch((err) => {
-                console.error('Error:', err);
-            });
-    }, []);
+                    fetch(LEETCODE_API_ENDPOINT, init)
+                        .then((res) => {
+                            return res.json();
+                        })
+                        .then(r => r.data.activeDailyCodingChallengeQuestion)
+                        .then((data) => {
+                            setLink(LEETCODE_LINK + data.link);
+                            setDifficulty(data.question.difficulty);
+                            setTitle(data.question.title);
+                            return data;
+                        })
+                        .then((data) => {
+                            console.log("creating leetcode task on the backend", data)
+                            return fetch('/api/leetcode', {
+                                method: 'POST',
+                                headers: {'Accept': 'application.json', 'Content-Type': 'application/json'},
+                                body: JSON.stringify({
+                                    link: data.link,
+                                    difficulty: data.question.difficulty,
+                                    title: data.question.title,
+                                    date: new Date().toISOString().split('T')[0]
+                                })
+                            })
+                        })
+                        .catch((err) => {
+                            console.error('Error: ', err);
+                        });
+                }
+            )
+        }, []
+    );
 
     const openInNewTab = (url) => {
         window.open(url, '_blank', 'noreferrer');
