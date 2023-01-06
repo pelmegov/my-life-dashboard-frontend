@@ -2,14 +2,16 @@
 const express = require('express');
 const {PrismaClient} = require("@prisma/client");
 const app = express();
-const bodyParser = require("body-parser");
 const port = process.env.PORT || 3001;
 
 const prisma = new PrismaClient()
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.json());
+
+process.on('uncaughtException', function (err) {
+    console.log('Caught exception: ', err);
+});
 
 app.get('/api/leetcode', async (req, res) => {
     const leetcodeAll = await prisma.leetcodeDaily.findMany()
@@ -17,7 +19,7 @@ app.get('/api/leetcode', async (req, res) => {
 })
 
 app.get('/api/leetcode/:date', async (req, res) => {
-    console.log("requested date " + req.params.date)
+    console.log("requested date ", req.params.date)
     const leetcodeDaily = await prisma.leetcodeDaily.findUnique({
             where: {
                 date: req.params.date,

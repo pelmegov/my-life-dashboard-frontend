@@ -79,7 +79,7 @@ function LeetcodeDaily(props) {
                                     link: data.link,
                                     difficulty: data.question.difficulty,
                                     title: data.question.title,
-                                    date: new Date().toISOString().split('T')[0]
+                                    date: data.date
                                 })
                             })
                         })
